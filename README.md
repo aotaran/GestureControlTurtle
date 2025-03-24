@@ -36,7 +36,7 @@ source install/setup.bash
 ## 🚀 Running the Project
 Start everything (Turtlesim + Gesture Control) with:
 ```bash
-ros2 launch gesture_control gesture_control_launch.py
+ros2 launch GestureControlTurtle gesturecontrol_launch.py
 ```
 This will:
 1. Open **Turtlesim** with one turtle.
