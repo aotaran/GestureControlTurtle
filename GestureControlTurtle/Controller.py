@@ -73,7 +73,7 @@ class GestureController(Node):
 
                     hand_center=(center_x, center_y)
                     bullseye_center=(hf_center_x+hf_right_shift*rl_value, hf_center_y)
-
+                    bullseye_radii=(40,100)
                     gesture = recognize_gesture(hand_landmarks)
 
                     tilt = recognize_handtilt(hand_landmarks)
@@ -82,11 +82,11 @@ class GestureController(Node):
                     
                     if rl_value==1:
                         robot_pos=(self.pose_turtleR.x,self.pose_turtleR.y,self.pose_turtleR.theta)
-                        twist_command = twist_calculation(gesture,relative_pos,robot_pos)
+                        twist_command = twist_calculation(gesture,relative_pos,robot_pos,bullseye_radii)
                         self.publisher_turtleR.publish(twist_command)
                     else:
                         robot_pos=(self.pose_turtleL.x,self.pose_turtleL.y,self.pose_turtleL.theta)
-                        twist_command = twist_calculation(gesture,relative_pos,robot_pos)
+                        twist_command = twist_calculation(gesture,relative_pos,robot_pos,bullseye_radii)
                         self.publisher_turtleL.publish(twist_command)
                     
                     ##############################
@@ -109,10 +109,10 @@ class GestureController(Node):
                     
 
                     # Small circle around center
-                    cv2.circle(overlay, bullseye_center, 40 , HandColor, 5)
+                    cv2.circle(overlay, bullseye_center, bullseye_radii[0] , HandColor, 5)
 
                     # Big circle around center
-                    cv2.circle(overlay, bullseye_center, 100 , HandColor, 5)
+                    cv2.circle(overlay, bullseye_center, bullseye_radii[1] , HandColor, 5)
 
                     cv2.line(overlay,bullseye_center,hand_center,HandColor,5)
 
@@ -197,7 +197,7 @@ def recognize_handtilt(landmarks):
     return round(tilt*scale,2)
     
 
-def twist_calculation(gesture,hand_relative_pos,robot_pos):
+def twist_calculation(gesture,hand_relative_pos,robot_pos,bullseye_radii):
     twist_command=Twist()
     twist_command.linear.x = 0.0
     twist_command.linear.y = 0.0
@@ -210,6 +210,7 @@ def twist_calculation(gesture,hand_relative_pos,robot_pos):
     px=robot_pos[0]
     py=robot_pos[1]
     theta=robot_pos[2]
+
     match gesture:
         case "Peace Sign":
             twist_command.angular.z = rz
@@ -217,8 +218,8 @@ def twist_calculation(gesture,hand_relative_pos,robot_pos):
             twist_command.linear.x = rx*math.cos(theta) + ry*math.sin(theta)
             twist_command.linear.y = -rx*math.sin(theta) + ry*math.cos(theta)
         case "Fist": # Go straight
-            twist_command.linear.x = rx
-            twist_command.linear.y = ry
+            twist_command.linear.x = rx*math.cos(theta) + ry*math.sin(theta)
+            twist_command.linear.y = -rx*math.sin(theta) + ry*math.cos(theta)
         case "Open Palm": # Stop
             twist_command.linear.x = 0.0
     return twist_command
