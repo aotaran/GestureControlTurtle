@@ -49,16 +49,15 @@ This will:
 | Gesture | Action (Right Hand → Turtle1, Left Hand → Turtle2) |
 |---------|--------------------------------------------------|
 | Open hand | Stop |
-| Fist | Position Mode |
-| Index finger open | Velocity Mode |
+| Fist | Velocity Mode |
+| Index finger open | Position Mode |
 | Peace Sign | Rotation Mode |
 
-**Position Mode:** Hand position is in xy-plane translated to Turtle position in xy-plane.
+**Position Mode:** Hand position is in xy-plane translated to Turtle position in xy-plane. (Not fully implemented)
 
 **Velocity Mode:** Hand position is in xy-plane translated to Turtle velocity in xy-plane.
 
 **Rotation Mode:** Hand rotation is translated to Turtle rotation speed. 
-
 
 **Press 'Q' to quit the gesture recognition window.**
 
