@@ -154,25 +154,8 @@ def recognize_gesture(landmarks):
     fingers = []
     tips = [4, 8, 12, 16, 20]
     
-    # Thumb (different checking logic since it moves differently)
-    handrootx=landmarks.landmark[0].x 
-    thumbtipx=landmarks.landmark[tips[0]].x 
-    thumbrootx=landmarks.landmark[tips[0]-2].x
-    d_handroot_thumbroot=thumbrootx-handrootx
-    d_thumbroot_thumbtip=thumbtipx-thumbrootx
-    r_thumb= d_thumbroot_thumbtip/d_handroot_thumbroot
-    if r_thumb>0.3:
-    #if landmarks.landmark[tips[0]].x > landmarks.landmark[tips[0] - 2].x:
-        fingers.append(1)  # Thumb extended
-    else:
-        fingers.append(0)
-    
-    # Other four fingers
-    for i in range(1, 5):
-        if landmarks.landmark[tips[i]].y < landmarks.landmark[tips[i] - 2].y:
-            fingers.append(1)  # Finger extended
-        else:
-            fingers.append(0)
+    for i in range(0, 5):
+        fingers.append(is_finger_open(tips[i], landmarks))
     
     # Gesture dictionary
     gestures = {
@@ -185,16 +168,49 @@ def recognize_gesture(landmarks):
         (0, 0, 1, 1, 1): "Three Fingers",
         (0, 0, 0, 1, 1): "Two Fingers"
     }
+
+    print(fingers)
     return gestures.get(tuple(fingers), "Unknown Gesture")
 
 def recognize_handtilt(landmarks):
     # Calculating a simplistic hand tilt parameter
     handrootx=landmarks.landmark[0].x 
-    middlefingerrootx=landmarks.landmark[9].x
+    middlefingerrootx=landmarks.landmark[13].x
+    # middlefingerrootx=(landmarks.landmark[9].x +landmarks.landmark[13].x )/2
     tilt= middlefingerrootx-handrootx
     scale=-10
     #print("Root: ", handrootx," Middle root: ", middlefingerrootx, " Tilt: ", tilt)
     return round(tilt*scale,2)
+
+def is_finger_open(fingertipind, landmarks):
+    # Check if finger is open
+
+    # If checking thumb
+    tip2root=2 if fingertipind==4 else 3
+
+    handroot = landmarks.landmark[0]
+    fingertip = landmarks.landmark[fingertipind]
+    fingerroot = landmarks.landmark[fingertipind-tip2root]
+
+    ftLoc=np.array([fingertip.x, fingertip.y])
+    frLoc=np.array([fingerroot.x, fingerroot.y])
+    hrLoc=np.array([handroot.x, handroot.y])
+
+    # Calculate distance vectors between wrist to knuckle and knuckle to fingertip
+    vector1 = ftLoc - frLoc
+    vector2 = frLoc - hrLoc
+
+    uv1 = vector1/np.linalg.norm(vector1)
+    uv2 = vector2/np.linalg.norm(vector2)
+
+    # Calculate the dot product of the vectors
+    r_finger= np.dot(uv1, uv2)
+
+    if r_finger>0.6:
+    #if landmarks.landmark[tips[0]].x > landmarks.landmark[tips[0] - 2].x:
+        return 1  # Finger extended
+    else:
+        return 0
     
 
 def twist_calculation(gesture,hand_relative_pos,robot_pos,bullseye_radii):
