@@ -25,7 +25,7 @@ pip install mediapipe opencv-python numpy
 ### 3️⃣ Clone & Build the Package
 ```bash
 cd ~/ros2_ws/src
-git clone <your-repo-url> gesture_control
+git clone https://github.com/aotaran/GestureControlTurtle.git
 cd ~/ros2_ws
 colcon build
 source install/setup.bash
